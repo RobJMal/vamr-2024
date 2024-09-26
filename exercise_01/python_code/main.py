@@ -22,8 +22,9 @@ def main():
     # define 3D corner positions
     # [Nx3] matrix containing the corners of the checkerboard as 3D points
     # (X,Y,Z), expressed in the world coordinate system
-    x_range = np.arange(0, 9, 1)
-    y_range = np.arange(0, 6, 1)
+    square_size = 0.04
+    x_range = np.arange(0, 9, 1) * square_size
+    y_range = np.arange(0, 6, 1) * square_size
     X, Y = np.meshgrid(x_range, y_range)
     Z = np.zeros_like(X)    # Checkerboard is flat in world frame 
     checkerboard_corners_world = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
@@ -51,6 +52,20 @@ def main():
 
     # transform 3d points from world to current camera pose
     projected_points = project_points(checkerboard_corners_camera.T, K_matrix, D_matrix)
+
+    # draw the projected points on the image
+    plt.figure(figsize=(10, 7))
+    plt.imshow(image_i, cmap='gray')
+
+    plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
+
+    plt.xlim([0, image_i.shape[1]]) # Image width
+    plt.ylim([image_i.shape[0], 0]) # Image height
+
+    plt.title("Projected points on undistorated image")
+    plt.legend()
+    plt.show()
+
 
     # undistort image with bilinear interpolation
     """ Remove this comment if you have completed the code until here

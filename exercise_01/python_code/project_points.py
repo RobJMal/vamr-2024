@@ -19,5 +19,7 @@ def project_points(points_3d: np.ndarray,
         projected_points: 2d points (2xN)
     """
     projected_points = K @ points_3d
-    
-    return projected_points[0:2, :] # Returning only pixel coordinates
+
+    projected_points = (projected_points[0:2, :] / projected_points[2, :])
+
+    return projected_points
