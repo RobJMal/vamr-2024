@@ -9,6 +9,8 @@ from project_points import project_points
 from undistort_image import undistort_image
 from undistort_image_vectorized import undistort_image_vectorized
 
+# Addtional imports 
+
 
 def main():
     pass
@@ -34,7 +36,9 @@ def main():
 
     # load one image with a given index
     # TODO: Your code here
-
+    image_index = 352
+    image_path = '../data/images/img_{:04d}.jpg'.format(image_index)
+    image_i = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
     # project the corners on the image
     # compute the 4x4 homogeneous transformation matrix that maps points
