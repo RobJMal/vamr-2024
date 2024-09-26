@@ -16,28 +16,26 @@ def main():
     pass
 
     # load camera poses
-
     # each row i of matrix 'poses' contains the transformations that transforms
     # points expressed in the world frame to
     # points expressed in the camera frame
-
-    # TODO: Your code here
     camera_poses = np.loadtxt('../data/poses.txt')
 
     # define 3D corner positions
     # [Nx3] matrix containing the corners of the checkerboard as 3D points
     # (X,Y,Z), expressed in the world coordinate system
-
-    # TODO: Your code here
+    x_range = np.arange(0, 9, 1)
+    y_range = np.arange(0, 6, 1)
+    X, Y = np.meshgrid(x_range, y_range)
+    Z = np.zeros_like(X)    # Checkerboard is flat in world frame 
+    checkerboard_corners = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
 
     # load camera intrinsics
-    # TODO: Your code here
     camera_intrinsics = np.loadtxt('../data/K.txt')
 
     # load one image with a given index
-    # TODO: Your code here
-    image_index = 352
-    image_path = '../data/images/img_{:04d}.jpg'.format(image_index)
+    image_index = 1
+    image_path = '../data/images_undistorted/img_{:04d}.jpg'.format(image_index)
     image_i = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
     # project the corners on the image
