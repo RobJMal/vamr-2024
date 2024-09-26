@@ -43,6 +43,7 @@ def main():
     # from the world to the camera coordinate frame
 
     # TODO: Your code here
+    tranformation_matrix = pose_vector_to_transformation_matrix(camera_poses[image_index - 1])
 
 
     # transform 3d points from world to current camera pose
