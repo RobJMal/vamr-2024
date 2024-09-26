@@ -13,8 +13,6 @@ from undistort_image_vectorized import undistort_image_vectorized
 
 
 def main():
-    pass
-
     # load camera poses
     # each row i of matrix 'poses' contains the transformations that transforms
     # points expressed in the world frame to
@@ -28,10 +26,11 @@ def main():
     y_range = np.arange(0, 6, 1)
     X, Y = np.meshgrid(x_range, y_range)
     Z = np.zeros_like(X)    # Checkerboard is flat in world frame 
-    checkerboard_corners = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
+    checkerboard_corners_world = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
 
-    # load camera intrinsics
-    camera_intrinsics = np.loadtxt('../data/K.txt')
+    # load camera intrinsics and distortion coefficients
+    K_matrix = np.loadtxt('../data/K.txt')
+    D_matrix = np.loadtxt('../data/D.txt')
 
     # load one image with a given index
     image_index = 1
@@ -41,13 +40,17 @@ def main():
     # project the corners on the image
     # compute the 4x4 homogeneous transformation matrix that maps points
     # from the world to the camera coordinate frame
+    transformation_matrix = pose_vector_to_transformation_matrix(camera_poses[image_index - 1])
 
-    # TODO: Your code here
-    tranformation_matrix = pose_vector_to_transformation_matrix(camera_poses[image_index - 1])
+    # Appending a column of ones to the checkerboard_corners to apply transformation matrix 
+    checkerboard_corners_world_homogeneous = np.hstack([checkerboard_corners_world, np.ones((checkerboard_corners_world.shape[0], 1))])
+    checkerboard_corners_camera_homogenous = transformation_matrix @ checkerboard_corners_world_homogeneous.T
 
+    # Convert back to 3D (x, y, z) by dividing by the homogeneous coordinate w (the fourth component)
+    checkerboard_corners_camera = (checkerboard_corners_camera_homogenous[:3, :] / checkerboard_corners_camera_homogenous[3, :]).T
 
     # transform 3d points from world to current camera pose
-    # TODO: Your code here
+    projected_points = project_points(checkerboard_corners_camera.T, K_matrix, D_matrix)
 
     # undistort image with bilinear interpolation
     """ Remove this comment if you have completed the code until here
