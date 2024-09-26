@@ -20,6 +20,7 @@ def main():
     # points expressed in the camera frame
 
     # TODO: Your code here
+    camera_poses = np.loadtxt('../data/poses.txt')
 
     # define 3D corner positions
     # [Nx3] matrix containing the corners of the checkerboard as 3D points
