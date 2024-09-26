@@ -30,6 +30,7 @@ def main():
 
     # load camera intrinsics
     # TODO: Your code here
+    camera_intrinsics = np.loadtxt('../data/K.txt')
 
     # load one image with a given index
     # TODO: Your code here
