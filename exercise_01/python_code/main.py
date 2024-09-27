@@ -9,8 +9,6 @@ from project_points import project_points
 from undistort_image import undistort_image
 from undistort_image_vectorized import undistort_image_vectorized
 
-# Addtional imports 
-
 
 def main():
     # load camera poses
@@ -34,14 +32,14 @@ def main():
     D_matrix = np.loadtxt('../data/D.txt')
 
     # load one image with a given index
-    image_index = 1
-    image_path = '../data/images_undistorted/img_{:04d}.jpg'.format(image_index)
-    image_i = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    img_index = 1
+    img_path = '../data/images_undistorted/img_{:04d}.jpg'.format(img_index)
+    img_undistorted = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
     # project the corners on the image
     # compute the 4x4 homogeneous transformation matrix that maps points
     # from the world to the camera coordinate frame
-    transformation_matrix = pose_vector_to_transformation_matrix(camera_poses[image_index - 1])
+    transformation_matrix = pose_vector_to_transformation_matrix(camera_poses[img_index - 1])
 
     # Appending a column of ones to the checkerboard_corners to apply transformation matrix 
     checkerboard_corners_world_homogeneous = np.hstack([checkerboard_corners_world, np.ones((checkerboard_corners_world.shape[0], 1))])
@@ -55,12 +53,12 @@ def main():
 
     # draw the projected points on the image
     plt.figure(figsize=(10, 7))
-    plt.imshow(image_i, cmap='gray')
+    plt.imshow(img_undistorted, cmap='gray')
 
     plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
 
-    plt.xlim([0, image_i.shape[1]]) # Image width
-    plt.ylim([image_i.shape[0], 0]) # Image height
+    plt.xlim([0, img_undistorted.shape[1]]) # Image width
+    plt.ylim([img_undistorted.shape[0], 0]) # Image height
 
     plt.title("Projected points on undistorated image")
     plt.legend()
@@ -92,17 +90,72 @@ def main():
     plt.show()
     """
 
-    # calculate the cube points to then draw the image
-    # TODO: Your code here
+    ########################################################
+    ### Calculate the cube points to then draw the image ###
+    ########################################################
+
+    # Defining the cube points expressed in world coordinate system 
+    def generate_cube_points(x_unit_coord_start_vertex, y_unit_coord_start_vertex, cube_unit_size=2, grid_size=0.04):
+        """
+        Generates the points of the cube given the start vertex and the size of the cube.
+
+        Note that cube points are returned based on plotting convention established in exercise. 
+
+        Args:
+            x_unit_coord_start_vertex: x coordinate of the start vertex. Using unit coordinates
+            y_unit_coord_start_vertex: y coordinate of the start vertex. Using unit coordinates
+            grid_size: size of the grid in meters
+            cube_unit_size: size of the cube
+
+        Returns:
+            cube_points: 3D points (8x3)
+        """
+        # Check the input x and y coordinates to make sure it is valid
+        assert x_unit_coord_start_vertex >= 0, "x_unit_coord_start_vertex should be greater than or equal to 0"
+        assert y_unit_coord_start_vertex >= 0, "y_unit_coord_start_vertex should be greater than or equal to 0"
+        assert x_unit_coord_start_vertex < 9 - 1, "x_unit_coord_start_vertex should be less than 8" # Limiting to 9 - 1 to avoid going out of checkerboard
+        assert y_unit_coord_start_vertex < 6 - 1, "y_unit_coord_start_vertex should be less than 5" # Limiting to 6 - 1 to avoid going out of checkerboard
+
+        x_vertex = x_unit_coord_start_vertex * grid_size
+        y_vertex = y_unit_coord_start_vertex * grid_size
+        cube_size = cube_unit_size * grid_size
+
+        # z coordinate is negative to make sure the cube above the checkerboard
+        # (based on world coordinate system)
+        cube_points = np.array([
+            [x_vertex, y_vertex, -cube_size],                       # Vertex 0, top layer of cube
+            [x_vertex, y_vertex, 0],                                # Vertex 1, bottom layer of cube
+            [x_vertex+cube_size, y_vertex, -cube_size],             # Vertex 2, top layer of cube
+            [x_vertex+cube_size, y_vertex, 0],                      # Vertex 3, bottom layer of cube
+            [x_vertex, y_vertex+cube_size, -cube_size],             # Vertex 4, top layer of cube
+            [x_vertex, y_vertex+cube_size, 0],                      # Vertex 5, bottom layer of cube
+            [x_vertex+cube_size, y_vertex+cube_size, -cube_size],   # Vertex 6, top layer of cube
+            [x_vertex+cube_size, y_vertex+cube_size, 0],            # Vertex 7, bottom layer of cube
+            ])
+
+        return cube_points
     
+    cube_points_world = generate_cube_points(x_unit_coord_start_vertex=2, 
+                                             y_unit_coord_start_vertex=2, 
+                                             cube_unit_size=2, grid_size=0.04)
+
+    # Appending a column of ones to the cube_points to apply transformation matrix 
+    cube_points_world_homogeneous = np.hstack([cube_points_world, np.ones((cube_points_world.shape[0], 1))])
+    cube_points_camera_homogenous = transformation_matrix @ cube_points_world_homogeneous.T
+
+    # Convert back to 3D (x, y, z) by dividing by the homogeneous coordinate w (the fourth component)
+    cube_points_camera = (cube_points_camera_homogenous[:3, :] / cube_points_camera_homogenous[3, :]).T
+
+    # transform 3d points from world to current camera pose
+    cube_pts = project_points(cube_points_camera.T, K_matrix, D_matrix).T
+
     # Plot the cube
-    """ Remove this comment if you have completed the code until here
     plt.clf()
     plt.close()
     plt.imshow(img_undistorted, cmap='gray')
 
     lw = 3
-
+    
     # base layer of the cube
     plt.plot(cube_pts[[1, 3, 7, 5, 1], 0],
              cube_pts[[1, 3, 7, 5, 1], 1],
@@ -122,7 +175,6 @@ def main():
     plt.plot(cube_pts[[6, 7], 0], cube_pts[[6, 7], 1], 'r-', linewidth=lw)
 
     plt.show()
-    """
 
 
 if __name__ == "__main__":
