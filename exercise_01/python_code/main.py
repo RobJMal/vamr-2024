@@ -9,6 +9,7 @@ from project_points import project_points
 from undistort_image import undistort_image
 from undistort_image_vectorized import undistort_image_vectorized
 
+# Section 2.2
 def project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix, plot=True):
     """
     Corresponds to Section 2.2 of the exercise. 
@@ -41,7 +42,7 @@ def project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix, plot=T
     checkerboard_corners_camera = (checkerboard_corners_camera_homogenous[:3, :] / checkerboard_corners_camera_homogenous[3, :]).T
 
     # transform 3d points from world to current camera pose
-    projected_points = project_points(checkerboard_corners_camera.T, K_matrix, D_matrix)
+    projected_points = project_points(checkerboard_corners_camera.T, K_matrix, D_matrix, distorted=False)
 
     # draw the projected points on the image
     if plot:
@@ -57,7 +58,7 @@ def project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix, plot=T
         plt.legend()
         plt.show()
 
-
+# Section 2.3
 def draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix, 
                                     x_unit_coord_start_vertex=0, 
                                     y_unit_coord_start_vectex=0,
@@ -132,7 +133,7 @@ def draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix,
     cube_points_camera = (cube_points_camera_homogenous[:3, :] / cube_points_camera_homogenous[3, :]).T
 
     # transform 3d points from world to current camera pose
-    cube_pts = project_points(cube_points_camera.T, K_matrix, D_matrix).T
+    cube_pts = project_points(cube_points_camera.T, K_matrix, D_matrix, distorted=False).T
 
     # Plot the cube
     if plot: 
@@ -162,6 +163,54 @@ def draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix,
 
         plt.show()
 
+# Section 3.2
+def project_points_to_distorted_image(camera_poses, K_matrix, D_matrix, plot=True):
+    """
+    Corresponds to Section 2.2 of the exercise. 
+    """
+    # define 3D corner positions
+    # [Nx3] matrix containing the corners of the checkerboard as 3D points
+    # (X,Y,Z), expressed in the world coordinate system
+    square_size = 0.04
+    x_range = np.arange(0, 9, 1) * square_size
+    y_range = np.arange(0, 6, 1) * square_size
+    X, Y = np.meshgrid(x_range, y_range)
+    Z = np.zeros_like(X)    # Checkerboard is flat in world frame 
+    checkerboard_corners_world = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
+
+    # load one image with a given index
+    img_index = 1
+    img_path = '../data/images/img_{:04d}.jpg'.format(img_index)
+    img_undistorted = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+
+    # project the corners on the image
+    # compute the 4x4 homogeneous transformation matrix that maps points
+    # from the world to the camera coordinate frame
+    transformation_matrix = pose_vector_to_transformation_matrix(camera_poses[img_index - 1])
+
+    # Appending a column of ones to the checkerboard_corners to apply transformation matrix 
+    checkerboard_corners_world_homogeneous = np.hstack([checkerboard_corners_world, np.ones((checkerboard_corners_world.shape[0], 1))])
+    checkerboard_corners_camera_homogenous = transformation_matrix @ checkerboard_corners_world_homogeneous.T
+
+    # Convert back to 3D (x, y, z) by dividing by the homogeneous coordinate w (the fourth component)
+    checkerboard_corners_camera = (checkerboard_corners_camera_homogenous[:3, :] / checkerboard_corners_camera_homogenous[3, :]).T
+
+    # transform 3d points from world to current camera pose
+    projected_points = project_points(checkerboard_corners_camera.T, K_matrix, D_matrix, distorted=True)
+
+    # draw the projected points on the image
+    if plot:
+        plt.figure(figsize=(10, 7))
+        plt.imshow(img_undistorted, cmap='gray')
+
+        plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
+
+        plt.xlim([0, img_undistorted.shape[1]]) # Image width
+        plt.ylim([img_undistorted.shape[0], 0]) # Image height
+
+        plt.title("Projected points on undistorated image")
+        plt.legend()
+        plt.show()
 
 def main():
 
@@ -173,8 +222,13 @@ def main():
     D_matrix = np.loadtxt('../data/D.txt')
 
     # Project points to undistorted image
-    project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix)
+    # project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix)
 
+    # Draw cube on undistorted image
+    # draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix)
+
+    # Project points to distorted image
+    project_points_to_distorted_image(camera_poses, K_matrix, D_matrix)
 
     # undistort image with bilinear interpolation
     """ Remove this comment if you have completed the code until here
@@ -199,10 +253,7 @@ def main():
     axs[1].set_axis_off()
     axs[1].set_title('Without bilinear interpolation')
     plt.show()
-    """
-
-    # Draw cube on undistorted image
-    draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix)
+    """ 
 
 
 if __name__ == "__main__":

@@ -5,7 +5,8 @@ from distort_points import distort_points
 
 def project_points(points_3d: np.ndarray,
                    K: np.ndarray,
-                   D: np.ndarray) -> np.ndarray:
+                   D: np.ndarray, 
+                   distorted: bool=False) -> np.ndarray:
     """
     Projects 3d points to the image plane, given the camera matrix,
     and distortion coefficients.
@@ -21,5 +22,8 @@ def project_points(points_3d: np.ndarray,
     projected_points = K @ points_3d
 
     projected_points = (projected_points[0:2, :] / projected_points[2, :])
+
+    if distorted:
+        return distort_points(projected_points, D, K)
 
     return projected_points
