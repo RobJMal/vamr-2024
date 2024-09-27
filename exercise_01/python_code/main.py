@@ -9,14 +9,10 @@ from project_points import project_points
 from undistort_image import undistort_image
 from undistort_image_vectorized import undistort_image_vectorized
 
-
-def main():
-    # load camera poses
-    # each row i of matrix 'poses' contains the transformations that transforms
-    # points expressed in the world frame to
-    # points expressed in the camera frame
-    camera_poses = np.loadtxt('../data/poses.txt')
-
+def project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix, plot=True):
+    """
+    Corresponds to Section 2.2 of the exercise. 
+    """
     # define 3D corner positions
     # [Nx3] matrix containing the corners of the checkerboard as 3D points
     # (X,Y,Z), expressed in the world coordinate system
@@ -26,10 +22,6 @@ def main():
     X, Y = np.meshgrid(x_range, y_range)
     Z = np.zeros_like(X)    # Checkerboard is flat in world frame 
     checkerboard_corners_world = np.vstack([X.ravel(), Y.ravel(), Z.ravel()]).T
-
-    # load camera intrinsics and distortion coefficients
-    K_matrix = np.loadtxt('../data/K.txt')
-    D_matrix = np.loadtxt('../data/D.txt')
 
     # load one image with a given index
     img_index = 1
@@ -52,47 +44,30 @@ def main():
     projected_points = project_points(checkerboard_corners_camera.T, K_matrix, D_matrix)
 
     # draw the projected points on the image
-    plt.figure(figsize=(10, 7))
-    plt.imshow(img_undistorted, cmap='gray')
+    if plot:
+        plt.figure(figsize=(10, 7))
+        plt.imshow(img_undistorted, cmap='gray')
 
-    plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
+        plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
 
-    plt.xlim([0, img_undistorted.shape[1]]) # Image width
-    plt.ylim([img_undistorted.shape[0], 0]) # Image height
+        plt.xlim([0, img_undistorted.shape[1]]) # Image width
+        plt.ylim([img_undistorted.shape[0], 0]) # Image height
 
-    plt.title("Projected points on undistorated image")
-    plt.legend()
-    plt.show()
+        plt.title("Projected points on undistorated image")
+        plt.legend()
+        plt.show()
 
 
-    # undistort image with bilinear interpolation
-    """ Remove this comment if you have completed the code until here
-    start_t = time.time()
-    img_undistorted = undistort_image(img, K, D, bilinear_interpolation=True)
-    print('Undistortion with bilinear interpolation completed in {}'.format(
-        time.time() - start_t))
-
-    # vectorized undistortion without bilinear interpolation
-    start_t = time.time()
-    img_undistorted_vectorized = undistort_image_vectorized(img, K, D)
-    print('Vectorized undistortion completed in {}'.format(
-        time.time() - start_t))
-    
-    plt.clf()
-    plt.close()
-    fig, axs = plt.subplots(2)
-    axs[0].imshow(img_undistorted, cmap='gray')
-    axs[0].set_axis_off()
-    axs[0].set_title('With bilinear interpolation')
-    axs[1].imshow(img_undistorted_vectorized, cmap='gray')
-    axs[1].set_axis_off()
-    axs[1].set_title('Without bilinear interpolation')
-    plt.show()
+def draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix, 
+                                    x_unit_coord_start_vertex=0, 
+                                    y_unit_coord_start_vectex=0,
+                                    cube_unit_size=4,
+                                    plot=True):
     """
+    Draws a cube on the undistorted image.
 
-    ########################################################
-    ### Calculate the cube points to then draw the image ###
-    ########################################################
+    Corresponds to Section 2.3 of the exercise. 
+    """
 
     # Defining the cube points expressed in world coordinate system 
     def generate_cube_points(x_unit_coord_start_vertex, y_unit_coord_start_vertex, cube_unit_size=2, grid_size=0.04):
@@ -135,9 +110,19 @@ def main():
 
         return cube_points
     
-    cube_points_world = generate_cube_points(x_unit_coord_start_vertex=2, 
-                                             y_unit_coord_start_vertex=2, 
-                                             cube_unit_size=2, grid_size=0.04)
+    cube_points_world = generate_cube_points(x_unit_coord_start_vertex=x_unit_coord_start_vertex, 
+                                             y_unit_coord_start_vertex=y_unit_coord_start_vectex, 
+                                             cube_unit_size=cube_unit_size, grid_size=0.04)
+    
+    # load one image with a given index
+    img_index = 1
+    img_path = '../data/images_undistorted/img_{:04d}.jpg'.format(img_index)
+    img_undistorted = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+
+    # project the corners on the image
+    # compute the 4x4 homogeneous transformation matrix that maps points
+    # from the world to the camera coordinate frame
+    transformation_matrix = pose_vector_to_transformation_matrix(camera_poses[img_index - 1])
 
     # Appending a column of ones to the cube_points to apply transformation matrix 
     cube_points_world_homogeneous = np.hstack([cube_points_world, np.ones((cube_points_world.shape[0], 1))])
@@ -150,31 +135,74 @@ def main():
     cube_pts = project_points(cube_points_camera.T, K_matrix, D_matrix).T
 
     # Plot the cube
+    if plot: 
+        plt.clf()
+        plt.close()
+        plt.imshow(img_undistorted, cmap='gray')
+
+        lw = 3
+        
+        # base layer of the cube
+        plt.plot(cube_pts[[1, 3, 7, 5, 1], 0],
+                cube_pts[[1, 3, 7, 5, 1], 1],
+                'r-',
+                linewidth=lw)
+
+        # top layer of the cube
+        plt.plot(cube_pts[[0, 2, 6, 4, 0], 0],
+                cube_pts[[0, 2, 6, 4, 0], 1],
+                'r-',
+                linewidth=lw)
+
+        # vertical lines
+        plt.plot(cube_pts[[0, 1], 0], cube_pts[[0, 1], 1], 'r-', linewidth=lw)
+        plt.plot(cube_pts[[2, 3], 0], cube_pts[[2, 3], 1], 'r-', linewidth=lw)
+        plt.plot(cube_pts[[4, 5], 0], cube_pts[[4, 5], 1], 'r-', linewidth=lw)
+        plt.plot(cube_pts[[6, 7], 0], cube_pts[[6, 7], 1], 'r-', linewidth=lw)
+
+        plt.show()
+
+
+def main():
+
+    # Load camera poses
+    camera_poses = np.loadtxt('../data/poses.txt')
+
+    # Load camera intrinsics and distortion coefficients
+    K_matrix = np.loadtxt('../data/K.txt')
+    D_matrix = np.loadtxt('../data/D.txt')
+
+    # Project points to undistorted image
+    project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix)
+
+
+    # undistort image with bilinear interpolation
+    """ Remove this comment if you have completed the code until here
+    start_t = time.time()
+    img_undistorted = undistort_image(img, K, D, bilinear_interpolation=True)
+    print('Undistortion with bilinear interpolation completed in {}'.format(
+        time.time() - start_t))
+
+    # vectorized undistortion without bilinear interpolation
+    start_t = time.time()
+    img_undistorted_vectorized = undistort_image_vectorized(img, K, D)
+    print('Vectorized undistortion completed in {}'.format(
+        time.time() - start_t))
+    
     plt.clf()
     plt.close()
-    plt.imshow(img_undistorted, cmap='gray')
-
-    lw = 3
-    
-    # base layer of the cube
-    plt.plot(cube_pts[[1, 3, 7, 5, 1], 0],
-             cube_pts[[1, 3, 7, 5, 1], 1],
-             'r-',
-             linewidth=lw)
-
-    # top layer of the cube
-    plt.plot(cube_pts[[0, 2, 6, 4, 0], 0],
-             cube_pts[[0, 2, 6, 4, 0], 1],
-             'r-',
-             linewidth=lw)
-
-    # vertical lines
-    plt.plot(cube_pts[[0, 1], 0], cube_pts[[0, 1], 1], 'r-', linewidth=lw)
-    plt.plot(cube_pts[[2, 3], 0], cube_pts[[2, 3], 1], 'r-', linewidth=lw)
-    plt.plot(cube_pts[[4, 5], 0], cube_pts[[4, 5], 1], 'r-', linewidth=lw)
-    plt.plot(cube_pts[[6, 7], 0], cube_pts[[6, 7], 1], 'r-', linewidth=lw)
-
+    fig, axs = plt.subplots(2)
+    axs[0].imshow(img_undistorted, cmap='gray')
+    axs[0].set_axis_off()
+    axs[0].set_title('With bilinear interpolation')
+    axs[1].imshow(img_undistorted_vectorized, cmap='gray')
+    axs[1].set_axis_off()
+    axs[1].set_title('Without bilinear interpolation')
     plt.show()
+    """
+
+    # Draw cube on undistorted image
+    draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix)
 
 
 if __name__ == "__main__":
