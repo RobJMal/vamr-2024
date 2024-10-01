@@ -166,7 +166,7 @@ def draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix,
 # Section 3.2
 def project_points_to_distorted_image(camera_poses, K_matrix, D_matrix, plot=True):
     """
-    Corresponds to Section 2.2 of the exercise. 
+    Corresponds to Section 3.2 of the exercise. 
     """
     # define 3D corner positions
     # [Nx3] matrix containing the corners of the checkerboard as 3D points
@@ -181,7 +181,7 @@ def project_points_to_distorted_image(camera_poses, K_matrix, D_matrix, plot=Tru
     # load one image with a given index
     img_index = 1
     img_path = '../data/images/img_{:04d}.jpg'.format(img_index)
-    img_undistorted = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    img_distorted = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
     # project the corners on the image
     # compute the 4x4 homogeneous transformation matrix that maps points
@@ -201,12 +201,12 @@ def project_points_to_distorted_image(camera_poses, K_matrix, D_matrix, plot=Tru
     # draw the projected points on the image
     if plot:
         plt.figure(figsize=(10, 7))
-        plt.imshow(img_undistorted, cmap='gray')
+        plt.imshow(img_distorted, cmap='gray')
 
         plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
 
-        plt.xlim([0, img_undistorted.shape[1]]) # Image width
-        plt.ylim([img_undistorted.shape[0], 0]) # Image height
+        plt.xlim([0, img_distorted.shape[1]]) # Image width
+        plt.ylim([img_distorted.shape[0], 0]) # Image height
 
         plt.title("Projected points on undistorated image")
         plt.legend()
@@ -221,10 +221,10 @@ def main():
     K_matrix = np.loadtxt('../data/K.txt')
     D_matrix = np.loadtxt('../data/D.txt')
 
-    # Project points to undistorted image
+    # # Project points to undistorted image
     # project_points_to_undistorted_image(camera_poses, K_matrix, D_matrix)
 
-    # Draw cube on undistorted image
+    # # Draw cube on undistorted image
     # draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix)
 
     # Project points to distorted image

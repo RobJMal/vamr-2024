@@ -19,12 +19,11 @@ def distort_points(x: np.ndarray,
     focal_length = np.array([K[0, 0], K[1, 1]])
     x = x.T # Transpose to make math easier
 
-    x_normalized = (x - optical_center) / focal_length
+    x_normalized = (x - optical_center)
+    r_squared = np.sum(x_normalized**2, axis=1)
 
-    r_squared = x_normalized[0]**2 + x_normalized[1]**2
-    radial_distortion = 1 + D[0]*r_squared + D[1]*r_squared**2
-
-    x_distorted = x_normalized * radial_distortion
-    distorted_points = (x_distorted * focal_length) + optical_center
+    radial_distortion = 1 + D[0] * r_squared + D[1] * r_squared**2
+    x_distorted = (x_normalized.T * radial_distortion).T
+    distorted_points = x_distorted + optical_center
 
     return distorted_points.T   # Transpose to match 
