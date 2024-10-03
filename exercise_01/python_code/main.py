@@ -218,7 +218,7 @@ def undistort_image_exercise(img, K, D, bilinear_interpolation=True, plot=True):
     Corresponds to Section 3.3 of the exercise. 
     """
     start_t = time.time()
-    img_undistorted = undistort_image(img, K, D, bilinear_interpolation=False)
+    img_undistorted = undistort_image(img, K, D, bilinear_interpolation=True)
     print('Undistortion with bilinear interpolation completed in {}'.format(
         time.time() - start_t))
 
