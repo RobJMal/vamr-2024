@@ -212,6 +212,34 @@ def project_points_to_distorted_image(camera_poses, K_matrix, D_matrix, plot=Tru
         plt.legend()
         plt.show()
 
+# Section 3.3
+def undistort_image(img, K, D, bilinear_interpolation=True, plot=True): 
+    """
+    Corresponds to Section 3.3 of the exercise. 
+    """
+    # start_t = time.time()
+    # img_undistorted = undistort_image(img, K, D, bilinear_interpolation=True)
+    # print('Undistortion with bilinear interpolation completed in {}'.format(
+    #     time.time() - start_t))
+
+    # vectorized undistortion without bilinear interpolation
+    start_t = time.time()
+    img_undistorted_vectorized = undistort_image_vectorized(img, K, D)
+    print('Vectorized undistortion completed in {}'.format(
+        time.time() - start_t))
+    
+    if plot:
+        plt.clf()
+        plt.close()
+        fig, axs = plt.subplots(2)
+        # axs[0].imshow(img_undistorted, cmap='gray')
+        axs[0].set_axis_off()
+        axs[0].set_title('With bilinear interpolation')
+        axs[1].imshow(img_undistorted_vectorized, cmap='gray')
+        axs[1].set_axis_off()
+        axs[1].set_title('Without bilinear interpolation')
+        plt.show()
+
 def main():
 
     # Load camera poses
@@ -228,32 +256,14 @@ def main():
     # draw_cube_to_unidistorted_image(camera_poses, K_matrix, D_matrix)
 
     # Project points to distorted image
-    project_points_to_distorted_image(camera_poses, K_matrix, D_matrix)
+    # project_points_to_distorted_image(camera_poses, K_matrix, D_matrix)
 
     # undistort image with bilinear interpolation
-    """ Remove this comment if you have completed the code until here
-    start_t = time.time()
-    img_undistorted = undistort_image(img, K, D, bilinear_interpolation=True)
-    print('Undistortion with bilinear interpolation completed in {}'.format(
-        time.time() - start_t))
-
-    # vectorized undistortion without bilinear interpolation
-    start_t = time.time()
-    img_undistorted_vectorized = undistort_image_vectorized(img, K, D)
-    print('Vectorized undistortion completed in {}'.format(
-        time.time() - start_t))
+    img_index = 1
+    img_path = '../data/images_undistorted/img_{:04d}.jpg'.format(img_index)
+    img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    undistort_image(img, K_matrix, D_matrix)
     
-    plt.clf()
-    plt.close()
-    fig, axs = plt.subplots(2)
-    axs[0].imshow(img_undistorted, cmap='gray')
-    axs[0].set_axis_off()
-    axs[0].set_title('With bilinear interpolation')
-    axs[1].imshow(img_undistorted_vectorized, cmap='gray')
-    axs[1].set_axis_off()
-    axs[1].set_title('Without bilinear interpolation')
-    plt.show()
-    """ 
 
 
 if __name__ == "__main__":
