@@ -260,7 +260,7 @@ def main():
 
     # undistort image with bilinear interpolation
     img_index = 1
-    img_path = '../data/images_undistorted/img_{:04d}.jpg'.format(img_index)
+    img_path = '../data/images/img_{:04d}.jpg'.format(img_index)
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     undistort_image(img, K_matrix, D_matrix)
     
