@@ -213,14 +213,14 @@ def project_points_to_distorted_image(camera_poses, K_matrix, D_matrix, plot=Tru
         plt.show()
 
 # Section 3.3
-def undistort_image(img, K, D, bilinear_interpolation=True, plot=True): 
+def undistort_image_exercise(img, K, D, bilinear_interpolation=True, plot=True): 
     """
     Corresponds to Section 3.3 of the exercise. 
     """
-    # start_t = time.time()
-    # img_undistorted = undistort_image(img, K, D, bilinear_interpolation=True)
-    # print('Undistortion with bilinear interpolation completed in {}'.format(
-    #     time.time() - start_t))
+    start_t = time.time()
+    img_undistorted = undistort_image(img, K, D, bilinear_interpolation=False)
+    print('Undistortion with bilinear interpolation completed in {}'.format(
+        time.time() - start_t))
 
     # vectorized undistortion without bilinear interpolation
     start_t = time.time()
@@ -232,7 +232,7 @@ def undistort_image(img, K, D, bilinear_interpolation=True, plot=True):
         plt.clf()
         plt.close()
         fig, axs = plt.subplots(2)
-        # axs[0].imshow(img_undistorted, cmap='gray')
+        axs[0].imshow(img_undistorted, cmap='gray')
         axs[0].set_axis_off()
         axs[0].set_title('With bilinear interpolation')
         axs[1].imshow(img_undistorted_vectorized, cmap='gray')
@@ -262,7 +262,7 @@ def main():
     img_index = 1
     img_path = '../data/images/img_{:04d}.jpg'.format(img_index)
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-    undistort_image(img, K_matrix, D_matrix)
+    undistort_image_exercise(img, K_matrix, D_matrix)
     
 
 
