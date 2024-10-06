@@ -1,2 +1,7 @@
 *.jpg
 __pycache__*
+
+# Ignoring colcon build stuff
+build/
+install/
+log/
