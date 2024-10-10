@@ -9,5 +9,6 @@ def reprojectPoints(P, M_tilde, K):
     #
     # Returns [n x 2] coordinates of the reprojected 2d points
 
-    pass
-    # TODO: Your code here
+    reprojected_points = np.zeros((P.shape[0], 2))
+
+    return reprojected_points
