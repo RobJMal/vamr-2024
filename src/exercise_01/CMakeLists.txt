@@ -9,12 +9,14 @@ include_directories(${CMAKE_SOURCE_DIR}/src/exercise_01/include)
 
 # Find packages
 find_package(OpenCV REQUIRED)
+find_package(xtensor REQUIRED)  # https://xtensor.readthedocs.io/en/latest/installation.html
 
 # Specify the executable
 add_executable(${PROJECT_NAME}_executable src/main.cpp src/vamr_utils.cpp src/exercise_01_helper.cpp)
 
 # Link OpenCV libraries
 target_link_libraries(${PROJECT_NAME}_executable ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME}_executable xtensor)
 
 # Specify include directories
 target_include_directories(${PROJECT_NAME}_executable PUBLIC ${CMAKE_SOURCE_DIR}/include)
