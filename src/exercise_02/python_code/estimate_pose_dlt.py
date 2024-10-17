@@ -14,12 +14,10 @@ def estimatePoseDLT(p, P, K):
     # that maps points from the world frame to the camera frame
 
     # Convert 2D to normalized coordinates
-    # TODO: Your code here
     p_augmented = np.hstack((p, np.ones((p.shape[0], 1)))) # Adding in column of ones to normalize
     p_normalized = (np.linalg.inv(K) @ p_augmented.T).T
 
     # Build measurement matrix Q
-    # TODO: Your code here
     num_points = p.shape[0] // 2
     Q_n = np.zeros((2, 12))   # Submatrix for each point 
     Q = np.zeros((2 * num_points, 12))
@@ -38,6 +36,8 @@ def estimatePoseDLT(p, P, K):
         ])
 
         # breakpoint()
+    # breakpoint()
+    
     # Solve for Q.M_tilde = 0 subject to the constraint ||M_tilde||=1
     # TODO: Your code here
     
