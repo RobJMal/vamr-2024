@@ -33,19 +33,21 @@ def main():
 
     p_C_corners = p_C_corners.reshape(12, 2)
 
-    plt.figure(figsize=(10, 7))
-        plt.imshow(img_undistorted, cmap='gray')
+    # plt.figure(figsize=(10, 7))
+    # plt.imshow(undist_img, cmap='gray')
 
-        plt.scatter(projected_points[0, :], projected_points[1, :], c='r', s=10, marker='o', label='Projected points')
+    # breakpoint()
 
-        plt.xlim([0, img_undistorted.shape[1]]) # Image width
-        plt.ylim([img_undistorted.shape[0], 0]) # Image height
+    # plt.scatter(p_C_corners[:, 0], p_C_corners[:, 1], c='r', s=10, marker='o', label='Projected points')
 
-        plt.title("Projected points on undistorated image")
-        plt.legend()
-        plt.show()
+    # plt.xlim([0, p_C_corners.shape[1]]) # Image width
+    # plt.ylim([p_C_corners.shape[0], 0]) # Image height
 
-    breakpoint()
+    # plt.title("Projected points on undistorated image")
+    # plt.legend()
+    # plt.show()
+
+    # breakpoint()
 
     # Now that we have the 2D <-> 3D correspondances let's find the camera pose
     # with respect to the world using the DLT algorithm
