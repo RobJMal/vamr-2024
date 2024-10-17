@@ -24,8 +24,6 @@ def main():
 
     # Load the 2D projected points that have been detected on the
     # undistorted image into an array
-    # p_C_corners = project_points(p_W_corners.T, K, np.zeros(4), distorted = F?
-    # p_C_corners_all = np.loadtxt("../data/detected_corners.txt", delimiter=" ")
     with open("../data/detected_corners.txt", 'r') as file:
         lines = [line for line in file if line.strip()]  # Skip empty lines
         line_i = lines[image_idx].strip()
@@ -33,25 +31,10 @@ def main():
 
     p_C_corners = p_C_corners.reshape(12, 2)
 
-    # plt.figure(figsize=(10, 7))
-    # plt.imshow(undist_img, cmap='gray')
-
-    # breakpoint()
-
-    # plt.scatter(p_C_corners[:, 0], p_C_corners[:, 1], c='r', s=10, marker='o', label='Projected points')
-
-    # plt.xlim([0, p_C_corners.shape[1]]) # Image width
-    # plt.ylim([p_C_corners.shape[0], 0]) # Image height
-
-    # plt.title("Projected points on undistorated image")
-    # plt.legend()
-    # plt.show()
-
-    # breakpoint()
-
     # Now that we have the 2D <-> 3D correspondances let's find the camera pose
     # with respect to the world using the DLT algorithm
     # TODO: Your code here
+    estimatePoseDLT(p_C_corners, p_W_corners, K)
 
     # Plot the original 2D points and the reprojected points on the image
     # TODO: Your code here

@@ -13,14 +13,31 @@ def estimatePoseDLT(p, P, K):
     # where R is a rotation matrix. M_tilde encodes the transformation 
     # that maps points from the world frame to the camera frame
 
-    pass
-
     # Convert 2D to normalized coordinates
     # TODO: Your code here
+    p_augmented = np.hstack((p, np.ones((p.shape[0], 1)))) # Adding in column of ones to normalize
+    p_normalized = (np.linalg.inv(K) @ p_augmented.T).T
 
     # Build measurement matrix Q
     # TODO: Your code here
+    num_points = p.shape[0] // 2
+    Q_n = np.zeros((2, 12))   # Submatrix for each point 
+    Q = np.zeros((2 * num_points, 12))
+    for p_i in range(num_points):
+        X_w_n, Y_w_n, Z_w_n = P[p_i, 0], P[p_i, 1], P[p_i, 2]
+        x_n, y_n =  p_normalized[p_i, 0], p_normalized[p_i, 1] 
 
+        # Q_n = np.array([
+        #     [X_w_n, Y_w_n, Z_w_n, 1, 0, 0, 0, 0, -x_n*X_w_n, -x_n*Y_w_n, -x_n*Z_w_n, -x_n],
+        #     [0, 0, 0, 0, X_w_n, Y_w_n, Z_w_n, 1, -y_n*X_w_n, -y_n*Y_w_n, -y_n*Z_w_n, -y_n],
+        # ])
+
+        Q[2*p_i:2*p_i+2, :] = np.array([
+            [X_w_n, Y_w_n, Z_w_n, 1, 0, 0, 0, 0, -x_n*X_w_n, -x_n*Y_w_n, -x_n*Z_w_n, -x_n],
+            [0, 0, 0, 0, X_w_n, Y_w_n, Z_w_n, 1, -y_n*X_w_n, -y_n*Y_w_n, -y_n*Z_w_n, -y_n],
+        ])
+
+        # breakpoint()
     # Solve for Q.M_tilde = 0 subject to the constraint ||M_tilde||=1
     # TODO: Your code here
     
