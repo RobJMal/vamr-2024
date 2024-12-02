@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exercise_01</name>
+  <version>0.1.0</version>
+  <description>Vision Algorithms for Mobile Robotics (VAMR) exercises implemented in C++</description>
+
+  <maintainer email="robjmal@gmail.com">Robert Jomar Malate</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>rclcpp</build_depend>
+  <exec_depend>rclcpp</exec_depend>
+</package>

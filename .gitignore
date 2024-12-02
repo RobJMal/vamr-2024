@@ -1,2 +1,9 @@
 *.jpg
 __pycache__*
+*.avi
+
+# Ignoring colcon build stuff
+build/
+install/
+log/
+.vscode/
