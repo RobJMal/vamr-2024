@@ -11,4 +11,9 @@ def reprojectPoints(P, M_tilde, K):
 
     reprojected_points = np.zeros((P.shape[0], 2))
 
+    P_augmented = np.hstack((P, np.ones((P.shape[0], 1)))) # Adding in column of ones to normalize
+    projection_homogenous = (K @ M_tilde @ P_augmented.T).T
+
+    reprojected_points = projection_homogenous[:, :2] / projection_homogenous[:, 2, np.newaxis]
+
     return reprojected_points

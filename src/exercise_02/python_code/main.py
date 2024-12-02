@@ -24,27 +24,32 @@ def main():
 
     # Load the 2D projected points that have been detected on the
     # undistorted image into an array
-    with open("../data/detected_corners.txt", 'r') as file:
-        lines = [line for line in file if line.strip()]  # Skip empty lines
-        line_i = lines[image_idx].strip()
-        p_C_corners = np.fromstring(line_i, sep=" ")
+    # with open("../data/detected_corners.txt", 'r') as file:
+    #     lines = [line for line in file if line.strip()]  # Skip empty lines
+    #     line_i = lines[image_idx].strip()
+    #     p_C_corners = np.fromstring(line_i, sep=" ")
 
-    p_C_corners = p_C_corners.reshape(12, 2)
+    # Causing errors with importing 
+    p_C_corners = np.reshape(
+            np.loadtxt("../data/detected_corners.txt")[image_idx-1,:],
+            (-1, 2) )
+
+    # p_C_corners = p_C_corners.reshape(12, 2)
 
     # Now that we have the 2D <-> 3D correspondances let's find the camera pose
     # with respect to the world using the DLT algorithm
-    # TODO: Your code here
-    estimatePoseDLT(p_C_corners, p_W_corners, K)
+    M_tilde = estimatePoseDLT(p_C_corners, p_W_corners, K)
+    R_matrix = M_tilde[:, 0:3]
+    t_vector = M_tilde[:, 3]
 
     # Plot the original 2D points and the reprojected points on the image
-    # TODO: Your code here
+    p_reproj = reprojectPoints(p_W_corners, M_tilde, K)
     
-    """ Remove this comment if you have completed the code until here
     plt.figure()
     plt.imshow(undist_img, cmap = "gray")
-    plt.scatter(pts_2d[:,0], pts_2d[:,1], marker = 'o')
+    plt.scatter(p_C_corners[:,0], p_C_corners[:,1], marker = 'o')
     plt.scatter(p_reproj[:,0], p_reproj[:,1], marker = '+')
-    """
+    plt.show()
 
     # Make a 3D plot containing the corner positions and a visualization
     # of the camera axis
