@@ -49,23 +49,21 @@ def main():
     plt.imshow(undist_img, cmap = "gray")
     plt.scatter(p_C_corners[:,0], p_C_corners[:,1], marker = 'o')
     plt.scatter(p_reproj[:,0], p_reproj[:,1], marker = '+')
-    plt.show()
 
     # Make a 3D plot containing the corner positions and a visualization
     # of the camera axis
-    """ Remove this comment if you have completed the code until here
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     ax.scatter(p_W_corners[:,0], p_W_corners[:,1], p_W_corners[:,2])
-    """
 
     # Position of the camera given in the world frame
-    # TODO: Your code here
+    R_C_W = M_tilde[:3, :3]
+    t_C_W = M_tilde[:3, 3]
+    rotMat = R_C_W.T
+    pos = -R_C_W.T @ t_C_W
 
-    """ Remove this comment if you have completed the code until here
     drawCamera(ax, pos, rotMat, length_scale = 0.1, head_size = 10)
     plt.show()
-    """
 
 
 def main_video():
@@ -78,17 +76,20 @@ def main_video():
     translations = np.zeros((num_images, 3))
     quaternions = np.zeros((num_images, 4))
     
-    # TODO: Your code here
+    for idx in range(num_images):
+        pts_2d = np.reshape(all_pts_2d[idx, :], (-1, 2))
+        M_tilde_dst = estimatePoseDLT(pts_2d, p_W_corners, K)
 
-    """ Remove this comment if you have completed the code until here
+        R_C_W = M_tilde_dst[:3, :3]
+        t_C_W = M_tilde_dst[:3, 3]
+        quaternions[idx, :] = Rotation.from_matrix(R_C_W.T).as_quat()
+        translations[idx, :] = -R_C_W.T @ t_C_W
+
     fps = 30
     filename = "../motion.avi"
     plotTrajectory3D(fps, filename, translations, quaternions, p_W_corners)
-    """
 
 
 if __name__=="__main__":
     main()
-    """ Remove this comment if you have completed the code until here
     main_video()
-    """
