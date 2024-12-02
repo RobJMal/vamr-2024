@@ -19,9 +19,10 @@ def estimatePoseDLT(p, P, K):
 
     # Build measurement matrix Q
     num_points = p.shape[0] // 2
-    Q_n = np.zeros((2, 12))   # Submatrix for each point 
-    Q = np.zeros((2 * num_points, 12))
-    for p_i in range(num_points):
+    num_corners = p_normalized.shape[0]
+    Q = np.zeros((2 * num_corners, 12))
+
+    for p_i in range(num_corners):
         X_w_n, Y_w_n, Z_w_n = P[p_i, 0], P[p_i, 1], P[p_i, 2]
         x_n, y_n =  p_normalized[p_i, 0], p_normalized[p_i, 1] 
 
@@ -52,7 +53,8 @@ def estimatePoseDLT(p, P, K):
 
     # Normalization scheme using the Frobenius norm:
     # recover the unknown scale using the fact that R_tilde is a true rotation matrix
-    scale_factor = np.linalg.norm(R_tilde)/np.linalg.norm(R_scaled)
+    scale_factor = np.linalg.norm(R_tilde, 'fro')/np.linalg.norm(R_scaled, 'fro')
+    # scale_factor = np.linalg.norm(R_tilde)/np.linalg.norm(R_scaled)
 
     # Checking R_tilde orthogonality
     assert np.isclose(np.linalg.det(R_tilde), 1.0, atol=1e-10)
